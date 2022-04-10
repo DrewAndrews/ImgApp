@@ -38,6 +38,7 @@ namespace IMGapp
                 Console.WriteLine("4.Min");
                 Console.WriteLine("5.Max");
                 Console.WriteLine("6.Mask");
+                Console.WriteLine("7.GradProcess");
                 int command = int.Parse(Console.ReadLine());
 
                 switch (command)
@@ -141,6 +142,30 @@ namespace IMGapp
                                 break;
                             }
                         }
+                    case 7:
+                        using (var img_out = imageProc.GradProcess(img1))
+                        {
+                            Console.WriteLine("Enter output image name: ");
+                            string output_image_name = Console.ReadLine();
+
+                            img_out.Save($"..\\..\\{output_image_name}");
+
+                            Console.WriteLine("Output image has been saved in " + Directory.GetParent("..\\..\\") + $"\\{output_image_name}");
+
+                            using (var histImage = imageProc.DrawGist(img_out))
+                            {
+                                Console.WriteLine("Enter output image name: ");
+                                string hist_image_name = Console.ReadLine();
+
+                                histImage.Save($"..\\..\\{hist_image_name}");
+
+                                Console.WriteLine("Output image has been saved in " + Directory.GetParent("..\\..\\") + $"\\{hist_image_name}");
+                                Console.ReadKey();
+                            }
+
+                            Console.ReadKey();
+                        }
+                        break;
                     default:
                         Console.WriteLine("Incorrect operation number");
                         Console.ReadKey();

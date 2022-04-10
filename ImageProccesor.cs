@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
+using System.Drawing.Drawing2D;
 
 namespace IMGapp
 {
@@ -188,6 +189,68 @@ namespace IMGapp
                 }
             }
             return out_img;
+        }
+
+        public Bitmap GradProcess(Bitmap img)
+        {
+            int height = img.Height, width = img.Width;
+            var out_img = new Bitmap(width, height);
+            for (int i = 0; i < height; ++i)
+            {
+                for (int j = 0; j < width; ++j)
+                {
+                    out_img.SetPixel(j, i, func(img.GetPixel(j, i)));
+                }
+            }
+            return out_img;
+        }
+
+        public Bitmap DrawGist(Bitmap img)
+        {
+            int[] hist = new int[256];
+            var histImage = new Bitmap(256, 1024);
+            int height = img.Height, width = img.Width;
+            for (int i = 0; i < height; ++i)
+            {
+                for (int j = 0; j < width; ++j)
+                {
+                    var pixel = img.GetPixel(j, i);
+                    var c = (pixel.R + pixel.G + pixel.B) / 3;
+                    hist[c]++;
+                }
+            }
+
+            var maxC = hist.Max();
+            var k = (double)height / maxC;
+            Console.WriteLine(maxC);
+            Console.WriteLine(k);
+
+            for (int i = 0; i < 256; i++)
+            {
+                int x1 = i, y1 = 1023;
+                int x2 = i, y2 = (int)(1023 - hist[i] * k);
+                Console.WriteLine(y2);
+
+                using (var g = Graphics.FromImage(histImage))
+                {
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.SmoothingMode = SmoothingMode.HighQuality;
+                    var pen = Pens.White.Clone() as Pen;
+                    pen.Width = 5;
+                    g.DrawLine(pen, x1, y1, x2, y2);
+                }
+            }
+
+            return histImage;
+        }
+
+        private Color func(Color pixel)
+        {
+            var r = (int)Program.Clamp(255.0d * Math.Pow((double)pixel.R / 255.0, 2), 0, 255);
+            var g = (int)Program.Clamp(255.0d * Math.Pow((double)pixel.G / 255.0, 2), 0, 255);
+            var b = (int)Program.Clamp(255.0d * Math.Pow((double)pixel.B / 255.0, 2), 0, 255);
+            var newPixel = Color.FromArgb(r, g, b);
+            return newPixel;
         }
     }
 }
